@@ -1,0 +1,26 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "cribl-core",
+  "version": "1.0.0",
+  "description": "Cribl product expertise for Claude — answer product questions from live Cribl docs, build and migrate Cribl Search dashboards, author Stream and Search Packs, and generate REST collector configs.",
+  "author": {
+    "name": "Simon Duchene",
+    "url": "https://github.com/simondev65"
+  },
+  "homepage": "https://docs.cribl.io",
+  "repository": "https://github.com/simondev65/claude-cribl-core-plugins",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cribl",
+    "stream",
+    "edge",
+    "search",
+    "lake",
+    "dashboards",
+    "packs",
+    "observability",
+    "telemetry",
+    "kql"
+  ],
+  "skills": ["./skills/"]
+}

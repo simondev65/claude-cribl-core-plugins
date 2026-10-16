@@ -1,0 +1,61 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  structure:
+    name: Manifests, skills, and leak check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Dependency-free, no network, no Claude Code install — safe to gate on.
+      - name: Validate manifests and skill frontmatter
+        run: python3 tools/validate-manifests.py
+
+      - name: Byte-compile bundled Python helpers
+        run: python3 -m compileall -q plugins/
+
+      - name: Shell-check bundled scripts
+        run: |
+          find plugins -name '*.sh' -print0 | while IFS= read -r -d '' script; do
+            echo "-- $script"
+            bash -n "$script" || exit 1
+          done
+
+  cli:
+    name: claude plugin validate --strict
+    runs-on: ubuntu-latest
+    # Advisory: depends on the published CLI, so a break here should not block a
+    # content PR. The `structure` job above is the enforced gate.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate marketplace manifest
+        run: claude plugin validate . --strict
+
+      - name: Validate plugin manifests and skills
+        run: |
+          for plugin in plugins/*/; do
+            echo "-- $plugin"
+            claude plugin validate "$plugin" --strict
+          done
